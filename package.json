@@ -1,0 +1,38 @@
+{
+  "name": "wifims-lan-chat",
+  "version": "1.0.0",
+  "description": "Secure offline LAN chat for home Wi-Fi. No internet, no Gmail, no cloud.",
+  "license": "MIT",
+  "author": "ZAKARIAELQANNAA-DV <https://github.com/ZAKARIAELQANNAA-DV>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZAKARIAELQANNAA-DV/wifims.git"
+  },
+  "keywords": [
+    "offline-first",
+    "lan-chat",
+    "socket-io",
+    "express",
+    "vanilla-js",
+    "no-cloud",
+    "privacy",
+    "home-network",
+    "family-tech"
+  ],
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "https": "node server.js --https"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
+    "qrcode": "^1.5.3",
+    "selfsigned": "^2.1.1",
+    "socket.io": "^4.7.5"
+  }
+}

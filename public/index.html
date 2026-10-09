@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0b1220" />
+<title>🏠 Home Chat — works without internet</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= LOGIN ================= -->
+  <section id="login" class="card">
+    <div class="logo">🏠</div>
+    <h1>Home Chat</h1>
+    <p class="sub">Talk with family on your <b>home Wi-Fi</b>.<br/>No internet needed. No Gmail. Nothing to install.</p>
+
+    <div id="joinBox" class="infobox">
+      <div class="small"><b>📶 Step 0:</b> connect this phone/PC to the <b>same Wi-Fi</b> as the host, then open:</div>
+      <div class="joinurl-row">
+        <code id="joinUrl">loading…</code>
+        <button id="copyBtn" class="ghost small-btn" type="button">📋 Copy</button>
+      </div>
+      <img id="qr" alt="Scan to join with phone camera" />
+      <div class="small muted center">👆 Phone? Point your camera at this code</div>
+      <div id="onlineNow" class="small center"></div>
+    </div>
+
+    <div class="steps">
+      <div class="step"><span class="n">1</span><div><b>Pick your name — only once</b><div class="small muted">E.g. Papa, Mama, Sara. It locks to this device so nobody can pretend to be you.</div></div></div>
+      <div class="step"><span class="n">2</span><div><b>Type the house password</b><div class="small muted">Ask the host. Default is <code>house123</code>.</div></div></div>
+      <div class="step"><span class="n">3</span><div><b>Press Join 💬</b><div class="small muted">Say hello in <b># Everyone</b>. Tap a person for a secret 1-to-1 chat.</div></div></div>
+    </div>
+
+    <label for="name">Your name</label>
+    <input id="name" maxlength="16" autocomplete="off" placeholder="Example: Papa" />
+    <div id="nameHint" class="small muted">3–16 letters/numbers only. You choose it once.</div>
+    <div id="lockNote" class="small"></div>
+
+    <label for="roomPw">House password</label>
+    <div class="pw-row">
+      <input id="roomPw" type="password" autocomplete="current-password" placeholder="Ask the host" />
+      <button id="showPw" class="ghost" type="button" title="Show password">👁️</button>
+    </div>
+
+    <button id="joinBtn">💬 Join house chat</button>
+    <div id="loginErr" class="err" role="alert"></div>
+
+    <button id="howBtn" class="ghost" type="button">❓ How does this work?</button>
+    <div id="howBox" class="small muted" style="display:none">
+      • One family PC runs the chat (the host).<br/>
+      • Others open the green address above in any browser.<br/>
+      • Messages never leave your house — unplug the internet cable and it still works.<br/>
+      • Name locked? The host taps <b>Release name</b> below, then you tap <b>Forget my name</b>.
+    </div>
+
+    <button id="fixBtn" class="ghost" type="button">📱 Phone can't open the page? Fix it</button>
+    <div id="fixBox" class="small muted" style="display:none">
+      1️⃣ Phone must join the <b>SAME Wi-Fi</b> as this PC (not mobile data, not Guest Wi-Fi). Turn mobile data OFF to be sure.<br/>
+      2️⃣ Type the green address <b>exactly</b>, starting with <b>http://</b> — never https on this port.<br/>
+      3️⃣ If the browser changes it to https or says <b>ERR_SSL_PROTOCOL_ERROR</b>: use the 🔒 encrypted address instead (<b>https://…:3443</b>), tap Advanced → Proceed.<br/>
+      4️⃣ Still nothing? Turn Wi-Fi off/on, rejoin, and retype the address. Some routers block Guest Wi-Fi from reaching PCs.
+    </div>
+
+    <details>
+      <summary>🔧 Host admin (head of house only)</summary>
+      <input id="adminPw" type="password" placeholder="Admin password" />
+      <div class="row">
+        <button id="adminUsers" class="ghost" type="button">See people</button>
+        <button id="adminClear" class="ghost" type="button">Delete all chat</button>
+      </div>
+      <input id="adminTarget" placeholder="Person name, e.g. Papa" />
+      <div class="row">
+        <button id="adminKick" class="ghost" type="button">Remove person</button>
+        <button id="adminRelease" class="ghost" type="button">Release name</button>
+      </div>
+      <pre id="adminOut" class="small"></pre>
+    </details>
+  </section>
+
+  <!-- ================= CHAT ================= -->
+  <section id="chat" style="display:none">
+    <header id="topbar">
+      <button id="menuBtn" class="iconbtn" type="button" title="People">☰</button>
+      <div class="mebox">
+        <div id="avatarMe" class="avatar">?</div>
+        <div class="meinfo">
+          <div class="merow"><strong id="me">—</strong><span class="lock" title="Locked to this device">🔒</span></div>
+          <div class="small muted"><span id="dot" class="dot"></span><span id="net">connecting…</span> • <span id="count">0 online</span></div>
+        </div>
+      </div>
+      <div class="row-btns">
+        <button id="searchToggle" class="ghost" type="button" title="Search messages">🔍</button>
+        <button id="helpBtn" class="ghost" type="button">❓</button>
+        <button id="logoutBtn" class="ghost" type="button">Exit</button>
+      </div>
+    </header>
+
+    <div id="reconnect" class="warnbar" style="display:none">📴 Disconnected — trying to reconnect… keep Wi-Fi on.</div>
+
+    <div id="helpCard" class="infobox" style="display:none">
+      <b>How to chat (30 seconds):</b><br/>
+      🟢 <b># Everyone</b> = the whole house reads it.<br/>
+      👤 Tap a <b>person</b> = secret talk, only you two.<br/>
+      📎 = photo/file (10MB). 📋 Paste or drag a photo in!<br/>
+      😀 = emoji. <kbd>Enter</kbd> sends, <kbd>Shift+Enter</kbd> = new line.<br/>
+      🔍 = search words in this chat.
+      <div><button id="helpClose" class="ghost small-btn" type="button">Got it! ✔</button></div>
+    </div>
+
+    <div id="talkBanner"><span id="talkIcon">🟢</span> <span>Talking to: <b id="talkTo">Everyone</b></span>
+      <div id="talkHint" class="small">Everyone here can read it.</div>
+    </div>
+    <div id="searchBar" style="display:none">
+      <input id="searchChat" placeholder="🔍 Search in this chat… (e.g. dinner)" />
+      <span id="searchCount" class="small muted"></span>
+      <button id="searchClear" class="ghost small-btn" type="button">✕</button>
+    </div>
+
+    <div id="layout">
+      <aside id="side">
+        <input id="searchPeople" placeholder="🔍 Find person…" autocomplete="off" />
+        <div class="side-title">TALK TO</div>
+        <div id="convos"></div>
+        <div id="noUsers" class="small muted">Nobody else here yet.<br/>Ask family to open the address + scan QR.</div>
+        <div class="side-foot small muted">🔒 Names are locked — nobody can fake you.<br/>Unplug internet to test: chat keeps working.</div>
+      </aside>
+      <div id="sideBackdrop" style="display:none"></div>
+
+      <main id="main">
+        <div id="msgsWrap">
+          <div id="msgs" aria-live="polite"></div>
+          <div id="emptyChat" class="empty">
+            <div style="font-size:44px">👋</div>
+            <b>No messages yet</b>
+            <div class="small muted">Say hello! Try:<br/>“Hello, who is home? 🏠”</div>
+          </div>
+          <button id="newPill" style="display:none" type="button">↓ New messages</button>
+          <button id="scrollBtn" style="display:none" type="button" title="Jump to latest">⬇</button>
+        </div>
+        <div id="typing" class="small"></div>
+        <div id="dropHint" style="display:none">📥 Drop photo/file to send it to <b id="dropTo">Everyone</b></div>
+        <div id="sendRow">
+          <label id="fileLabel" title="Send photo or file (max 10MB)">📎<input id="file" type="file" hidden /></label>
+          <div id="textWrap">
+            <textarea id="text" rows="1" maxlength="2000" placeholder="Message Everyone… (Enter = send)"></textarea>
+            <button id="emojiBtn" type="button" title="Emoji">😀</button>
+          </div>
+          <button id="sendBtn" disabled>Send ➤</button>
+        </div>
+        <div id="emojiPanel" style="display:none" role="grid" aria-label="Emoji picker"></div>
+        <div class="sendfoot"><span class="small muted"><kbd>Enter</kbd> send • <kbd>Shift+Enter</kbd> new line • paste/drag photo works</span><span id="charCount" class="small muted">0/2000</span></div>
+      </main>
+    </div>
+  </section>
+
+  <div id="lightbox" style="display:none"><span id="lightboxClose">✕</span><img id="lightboxImg" alt="photo preview" /><div id="lightboxName" class="small"></div></div>
+  <div id="toast" role="status"></div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

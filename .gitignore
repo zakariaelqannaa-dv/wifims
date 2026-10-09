@@ -1,0 +1,6 @@
+node_modules/
+data/*.pem
+data/*.json
+!data/.gitkeep
+uploads/*
+!uploads/.gitkeep
